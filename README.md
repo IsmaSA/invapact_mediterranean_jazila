@@ -2,10 +2,14 @@
 
 
 Project Leader	Jazila
+
 Project Co leader	Andrea
+
 Potential coauthors	Alexandros, Michele, Carlos, Ismael, Ahmed, Lucia
+
 Last Author	Elena
-co-last 
+
+ 
 
 Main points 
 - Use Biogeographic boundaries of the Mediterranean Basin
