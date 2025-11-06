@@ -17,3 +17,6 @@ Main points
 - normal descriptive patterns
 - native range origin - tropicalisation - Ismael has some data for Spain and Andrea will have data for marine
 - distribution maps - GBIF en relation avec InvaPact score Ismael
+
+
+Google Doc link : https://docs.google.com/document/d/1I59VssSzdf1qj7SiElkBK3vpyKvueDe5EC5fJ9Re-J0/edit?usp=sharing
