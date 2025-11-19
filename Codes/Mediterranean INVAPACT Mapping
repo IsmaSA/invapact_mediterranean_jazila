@@ -1,0 +1,89 @@
+# ============================================
+# CLEAN SCRIPT — Mediterranean INVAPACT Mapping
+# ============================================
+
+# 1️⃣ Setup
+rm(list = ls())
+setwd("C:/R/Project/invapact_mediterranean_jazila")
+
+packages <- c("sf","dplyr","stringr","mapview")
+install.packages(setdiff(packages, rownames(installed.packages())), repos = "https://cloud.r-project.org/")
+lapply(packages, library, character.only = TRUE)
+
+# -----------------------------------------
+# 2️⃣ Load & clean INVAPACT data
+# -----------------------------------------
+invapact <- read.csv("Data_raw/INVAPACT_scores.csv", stringsAsFactors = FALSE)
+
+# Keep rows with required fields
+invapact <- invapact %>%
+  filter(
+    !is.na(start_sampling_year),
+    !is.na(end_sampling_year),
+    !is.na(InvaPact_score)
+  )
+
+# Clean coordinates
+invapact <- invapact %>%
+  mutate(
+    sampling_longitude = str_replace_all(sampling_longitude, ",", "."),
+    sampling_latitude  = str_replace_all(sampling_latitude, ",", "."),
+    sampling_longitude = as.numeric(sampling_longitude),
+    sampling_latitude  = as.numeric(sampling_latitude)
+  )
+
+# Convert to sf
+invapact_sf <- invapact %>%
+  filter(!is.na(sampling_longitude), !is.na(sampling_latitude)) %>%
+  st_as_sf(coords = c("sampling_longitude", "sampling_latitude"),
+           crs = 4326, remove = FALSE)
+
+# -----------------------------------------
+# 3️⃣ Load Mediterranean shapefiles
+# -----------------------------------------
+med_inf <- st_read("Med_influence.gpkg")
+med_sea <- st_read("Med_seas.gpkg")
+
+# Ensure valid geometries
+med_inf <- st_make_valid(med_inf)
+med_sea <- st_make_valid(med_sea)
+
+# Drop Z/M dimensions
+med_inf <- st_zm(med_inf, drop = TRUE, what = "ZM")
+med_sea <- st_zm(med_sea, drop = TRUE, what = "ZM")
+
+# Harmonize CRS
+if (st_crs(med_inf) != st_crs(med_sea)) {
+  med_sea <- st_transform(med_sea, st_crs(med_inf))
+}
+
+# Keep only geometry columns to match structure
+med_inf_geom <- st_as_sf(st_geometry(med_inf))
+med_sea_geom <- st_as_sf(st_geometry(med_sea))
+
+# Combine into one Mediterranean polygon layer
+mediterranean_all <- rbind(med_inf_geom, med_sea_geom)
+
+# -----------------------------------------
+# 4️⃣ Filter points inside Mediterranean basin
+# -----------------------------------------
+invapact_sf <- st_transform(invapact_sf, st_crs(mediterranean_all))
+
+inside_idx <- st_intersects(invapact_sf, mediterranean_all, sparse = FALSE)
+invapact_sf_inside <- invapact_sf[inside_idx, ]
+
+# -----------------------------------------
+# 5️⃣ Map the result
+# -----------------------------------------
+mapview(mediterranean_all,
+        col.regions = "lightgrey",
+        alpha.regions = 0.5) +
+  mapview(invapact_sf_inside,
+          color = "red",
+          cex = 1.5,
+          alpha = 0.7,
+          legend = FALSE)
+
+# ============================================
+# END — Clean Mediterranean INVAPACT Script
+# ============================================
