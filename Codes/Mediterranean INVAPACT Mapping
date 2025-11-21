@@ -13,7 +13,7 @@ lapply(packages, library, character.only = TRUE)
 # -----------------------------------------
 # 2️⃣ Load & clean INVAPACT data
 # -----------------------------------------
-invapact <- read.csv("Data_raw/INVAPACT_scores.csv", stringsAsFactors = FALSE)
+invapact <- read.csv("Data/INVAPACT_scores.csv", stringsAsFactors = FALSE)  # I changed this to match with the repository str, also included the data into Data folder
 
 # Keep rows with required fields
 invapact <- invapact %>%
@@ -41,8 +41,8 @@ invapact_sf <- invapact %>%
 # -----------------------------------------
 # 3️⃣ Load Mediterranean shapefiles
 # -----------------------------------------
-med_inf <- st_read("Med_influence.gpkg")
-med_sea <- st_read("Med_seas.gpkg")
+med_inf <- st_read("Med_influence.gpkg") # these could be moved to "Data"
+med_sea <- st_read("Med_seas.gpkg") 
 
 # Ensure valid geometries
 med_inf <- st_make_valid(med_inf)
@@ -71,6 +71,86 @@ invapact_sf <- st_transform(invapact_sf, st_crs(mediterranean_all))
 
 inside_idx <- st_intersects(invapact_sf, mediterranean_all, sparse = FALSE)
 invapact_sf_inside <- invapact_sf[inside_idx, ]
+nrow(invapact_sf_inside) # 5,689
+
+
+
+# 4.1 trying to find relevant data:
+invapact_sf_outside<- invapact_sf[-inside_idx, ]
+nrow(invapact_sf_outside) # 63,718
+
+# Countries that are NOT relevant: 
+unique(invapact_sf_outside$sampling_country)
+remove <- c("United Kingdom","United States","Australia","Belgium","USA","Puerto Rico","South Africa","New Zealand","Estonia","CÃ´te dâ€™Ivoire",
+"Bahamas","Brazil","Russia","Japan","Poland","Lithuania","Republic of the Congo","Canada","Netherlands","Switzerland","Malawi","Latvia",
+"Finland","Chile","Ireland","Hungary","Democratic Republic of the Congo","United States of America","Colombia","Argentina","Zimbabwe","Rwanda",
+"United States;Canada","Turks and Caicos Islands","The Bahamas","Hungary;Austria;Czech Republic;Germany;Switzerland","Gabon","UK","Czechia",
+"Ireland; United Kingdom","Czech Republic","Romania","Senegal","Germany","Iceland","Slovakia","Sweden","Mexico","Indonesia","Austria","Philippines",
+"Chile; Argentina","England","Kenya","Togo","Saudi Arabia","Norway","China","Nepal","Thailand","Vietnam","Malaysia","Denmark","South Korea","Nigeria",
+"Ecuador","Ethiopia","Hungary;Romania","India","Samoa; American Samoa","Madagascar","Mozambique","Cook Islands","Peru","Croatia","Germany; Denmark",
+"Zambia","USA; Mexic","Dominican Republic","Honduras","Cuba","Bolivia","Republic of Korea","Panama","Canada; United States","Taiwan","Cameroon",
+"Trinidad and Tobago","Guatemala","Tanzania","Ghana","Costa Rica","Namibia","Belgium; Netherlands","Fiji","Uganda","Belarus","Sri Lanka","Republic of Ireland",
+"Pakistan","South Georgia and the South Sandwich Islands","French Southern and Antarctic Lands","Sierra Leone","Guinea","Seychelles","Wales",
+"Norway; Sweden","Sudan","Scotland","Uruguay","Bangladesh","The Netherlands","Burkina Faso","Yugoslavia","El Salvador","Botswana", "Singapore",
+"Papua New Guinea","Iran","Great Britain" , "Azerbaijan","Isle of Man", "Slovak Republic", "Oman", "Eritrea", "Ascension Island", "Brunei Darussalam","Ascension Island",
+"Saint Helena","Scotland, United Kingdom","British Indian Ocean Territory","Benin" ,"Montenegro", "Korea, Republic of","Botswana","Saint Helena, Ascension and Tristan da Cunha",
+ "Qatar" ,"Czechoslovakia","Mongolia","Ukraine","Jordan","United Arab Emirates"   )
+
+in.country<- c("Spain","Italy","Portugal","Cyprus","Greece","Portugal; Spain","Malta", "Portugal;Spain","Gibraltar","Albania" )
+
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_country %in% remove, ]
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_country %in% in.country, ]
+
+nrow(invapact_sf_outside) # 3,047
+
+
+
+unique(invapact_sf_outside$sampling_region) 
+
+remove <- c("Northern Caspian; Middle Caspian; Southern Caspian","England","Northern Ireland","Krusne Hory Mountains, Northern Bohemia",
+"Middle Caspian; Southern Caspian","Middle Caspian","Central Europe, Belgium and the Netherlands","Western France",
+"Brittany","South Korea","north-western Switzerland; south-western Germany","Cross River State","Upland southwest Mauritius",
+"Southwestern South Korea","Scottish Lowlands","Northern England","Southeast England","Ireland","Wales","Midlands",
+"Scottish Highlands & Islands","Southwest England","Arizona; New Mexico; Sonora","JaÃ©n","Tierra del Fuego Archipelago",
+"Northern Andean Patagonia","Tenerife, Canary Islands","Barents Sea","Alpes-Maritimes","Zambezi Basin","Mauritius",
+"Great Lakes basin","SE Madeira Island","SW Madeira Island","North America","Southwestern Cameroon","Tenerife","Normandy",
+"Tokelau","Apulia","Crozet archipelago","St. Elizabeth","Falkland Islands","Gulf of Riga, Estonia","Greater Paris Area", 
+"Gulf of Finland", "Gulf of Riga","Gulf of Gdansk and Puck Bay","Vistula Lagoon","New Caledonia", "Danish North Sea coast",
+"Canary Islands", "Azores","West-Central Bhutan" ,"RÃ©union","US Virgin Islands","Bay of Saint-Brieuc","Bermuda", "Streymoy",
+"Bretagne","ÃŽles Ã‰parses, TAAF","ÃŽles Ã‰parses","Detroit River","Tahiti, Society Islands","Loyalty Islands", "Pavlodar Region",  "Pampanga" ,
+"Ukrainian North Steppe subzone","north-west Israel","ZÃ¡horie Protected Area","Barents Sea","Mashonaland East Province","Mashonaland East Province",
+ "Regional Natural Park of BriÃ¨re","RÃ­o de la Plata estuary","East Jutland" , "Saaremaa Island","BartÄ±n Province","Ordu","Giresun", "Bumthang District",
+ "Eilat/Aqaba region","Southwestern Cameroon","Larsemann Hills oasis","Sakarya" ,"Kasserine Governorate", "Barents Sea and adjacent waters", "BartÄ±n",
+  "Michigan","Sinop Province","northwestern Venezuela", "South Orkney Islands","Central CÃ´te dâ€™Ivoire", "Savannakhet Province","Khammouane Province", 
+  "St. Helena", "Carmel coastal area","Courbet Peninsula, Kerguelen Island", "Singapore","Seine-et-Marne", "Alsace","Styria", "GoriÅ¡ka","Southwest Nigeria",
+ "Belize Barrier Reef","Kyiv","Trabzon","Artvin", "Sverdlovsk Oblast", "Belait District","Western Gulf of Finland","Inner Seychelles archipelago", "Incheon",
+"Guam","St. Vincent and the Grenadines","St. Croix", "Mt. Carmel, northern Israel","Aragua State","Southwestern France","Vinnytsia region", "Saiss plain, Central Morocco",
+"Centre-Val de Loire" ,"Gulf of Guinea","Gantsi District","Jutland","Mainland Estonia","CuraÃ§ao" ,"Christmas Island", "Black Sea", "Eastern middle Caspian Sea" ,
+"Northern Caspian Sea","Western middle Caspian Sea","Southern middle Caspian Sea","French Southern and Antarctic Lands" ,"Lesser Antilles", "Crimea",
+"Mozambique Channel","western France")
+
+in.region <- c("Gibraltar","Cap Bon; Jebel Abderrahmane","Eastern Mediterranean","Sea of Marmara","Eastern Pyrenees","Southeastern Alps", "Mt Ventoux",
+"El-Dakahlia; Damietta; Kafr El-Sheikh","SE-Portugal/SW-Spain","PyrÃ©nÃ©es Mountains","Camargue, RhÃ´ne River delta","Iberian Peninsula","Soca River system",
+"Guadiana River basin", "Falkland Islands (Malvinas)","Marmara region" ,"Negev desert", "Malta","Aegean Sea", "Pyrenees","Camargue","Mediterranean region of France",
+ "Corsica","NW Mediterranean","Aegean Sea","Cap Bon; Jebel Abderrahmane","Garonne catchment" )
+
+
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_region %in% remove, ]
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_region %in% in.region, ]
+
+
+
+unique(invapact_sf_outside$sampling_continent)
+remove = c("North America" ,"Oceania" ,  "South America" , "Antarctica")
+
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_continent %in% remove, ]
+nrow(invapact_sf_outside) #1,280
+
+
+unique(invapact_sf_outside$sampling_city) 
+
+
+to.include = c(in.region,in.country) # these must be included, however I am not sure if the Pyrennes should be included or not... (likely not?)
 
 # -----------------------------------------
 # 5️⃣ Map the result
