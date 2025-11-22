@@ -189,13 +189,29 @@ inside_sf <- inside %>%
 
 invapact_sf_inside <- rbind(invapact_sf_inside,inside_sf )
 
+# 4.2 Fill coordinates ----------------------------------
+
+invapact_sf_inside$sampling_latitude[invapact_sf_inside$sampling_latitude == "1"] <- NA
+invapact_sf_inside$sampling_longitude[invapact_sf_inside$sampling_longitude == "1"] <- NA
+
+
+
+anyNA(invapact_sf_inside$sampling_latitude)
+a<- nrow(invapact_sf_inside[is.na(invapact_sf_inside$sampling_latitude),]) 
+a #743 to fill
+
+res <- fill.coords(invapact_sf_inside)
+
+
+
+
 # -----------------------------------------
 # 5️⃣ Map the result
 # -----------------------------------------
 mapview(mediterranean_all,
         col.regions = "lightgrey",
         alpha.regions = 0.5) +
-  mapview(invapact_sf_inside,
+  mapview(result,
           color = "red",
           cex = 1.5,
           alpha = 0.7,
