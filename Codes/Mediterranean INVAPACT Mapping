@@ -6,7 +6,7 @@
 rm(list = ls())
 setwd("C:/R/Project/invapact_mediterranean_jazila")
 
-packages <- c("sf","dplyr","stringr","mapview")
+packages <- c("sf","dplyr","stringr","mapview","invapact")
 install.packages(setdiff(packages, rownames(installed.packages())), repos = "https://cloud.r-project.org/")
 lapply(packages, library, character.only = TRUE)
 
@@ -14,6 +14,7 @@ lapply(packages, library, character.only = TRUE)
 # 2️⃣ Load & clean INVAPACT data
 # -----------------------------------------
 invapact <- read.csv("Data/INVAPACT_scores.csv", stringsAsFactors = FALSE)  # I changed this to match with the repository str, also included the data into Data folder
+# data(invapact) # this just in case do not have the data
 
 # Keep rows with required fields
 invapact <- invapact %>%
@@ -127,9 +128,14 @@ remove <- c("Northern Caspian; Middle Caspian; Southern Caspian","England","Nort
 "Guam","St. Vincent and the Grenadines","St. Croix", "Mt. Carmel, northern Israel","Aragua State","Southwestern France","Vinnytsia region", "Saiss plain, Central Morocco",
 "Centre-Val de Loire" ,"Gulf of Guinea","Gantsi District","Jutland","Mainland Estonia","CuraÃ§ao" ,"Christmas Island", "Black Sea", "Eastern middle Caspian Sea" ,
 "Northern Caspian Sea","Western middle Caspian Sea","Southern middle Caspian Sea","French Southern and Antarctic Lands" ,"Lesser Antilles", "Crimea",
-"Mozambique Channel","western France")
+"Mozambique Channel","western France", "Hauts-de-France","Bothnian Sea","north-eastern Baltic Sea",
+"Centre Region; Loiret; Loir-et-Cher", "Shumen District","north-western Baltic Sea proper",
+"Jordan Valley","Curonian Lagoon","Nouvelle-Aquitaine","Bambou mountains, south east Mauritius",
+"Seine-et-Marne; ÃŽle-de-France","Moka Range","Provence-Alpes-CÃ´te d'Azur","Provence-Alpes-Cote d'Azur",
+"Occitanie","Terres Australes et Antarctiques FranÃ§aises", "Matrouh Governorate","French Massif Central","Belgrade",
+ "southwestern France","Hof HaCarmel","La RÃ©union","Rize","Western Slovenia; SoÄ\u008da River basin","Pyrenean National Park","FinistÃ¨re","Taounate","Chagos Archipelago","Bordeaux","South Sinai","Le Pouce Nature Reserve","Black River Gorges National Park","South-east Mauritius","Meuse River","Charente-Maritime","Loire","CorrÃ¨ze","Sarthe","Haut-Rhin","Vojvodina Province","SE Slovenia","Brittany; Normandy","Picardy","Aquitaine","Limousin","Gironde","Arava Valley","Poitou-Charentes","Caspian Sea", "Southwestern Mauritius", "Mount Carmel","Garonne river catchment; southwest France", "Western English Channel","Santa Monica Mountains", "Central Slovenia","Mont Saint-Michel Bay","ÃŽle-de-France")
 
-in.region <- c("Gibraltar","Cap Bon; Jebel Abderrahmane","Eastern Mediterranean","Sea of Marmara","Eastern Pyrenees","Southeastern Alps", "Mt Ventoux",
+in.region <- c("Lakes Region, southern Anatolia", "Istanbul","Sfax","Provence-Alpes-CÃ´te dâ€™Azur","Haute-Savoie","Greater Cairo","Istanbul Province","MuÄŸla-Milas region, south-west Anatolia","Kilis","Gaziantep","KahramanmaraÅŸ","Hatay","Osmaniye","Mersin","Adana","Atlantic coast of Morocco","Alpes Maritimes","south-eastern France","Eastern Mediterranean Sea","Provence-Alpes Cote dâ€™Azur","Auvergne","Rhone-Alpes","Bourgogne","Languedoc-Roussillon","El Kala National Park", "Roussillon","Lower Galilee Mountains", "Marmara Region", "Bouches-du-RhÃ´ne","Vaucluse", "Var", "Ain","El Tarf","Tanger-Tetouan-Al Hoceima","Levantine Sea", "Gulf of GabÃ¨s","Alexandria Governorate","Haifa District; Mount Carmel","Eastern Mediterranean Sea; Israel", "Adour-Garonne river basin, SW France", "Auvergne-RhÃ´ne-Alpes", "Gibraltar","Tel Aviv District", "Cap Bon; Jebel Abderrahmane","Eastern Mediterranean","Sea of Marmara","Eastern Pyrenees","Southeastern Alps", "Mt Ventoux",
 "El-Dakahlia; Damietta; Kafr El-Sheikh","SE-Portugal/SW-Spain","PyrÃ©nÃ©es Mountains","Camargue, RhÃ´ne River delta","Iberian Peninsula","Soca River system",
 "Guadiana River basin", "Falkland Islands (Malvinas)","Marmara region" ,"Negev desert", "Malta","Aegean Sea", "Pyrenees","Camargue","Mediterranean region of France",
  "Corsica","NW Mediterranean","Aegean Sea","Cap Bon; Jebel Abderrahmane","Garonne catchment" )
@@ -149,8 +155,39 @@ nrow(invapact_sf_outside) #1,280
 
 unique(invapact_sf_outside$sampling_city) 
 
+remove<- c("Villenave d'Ornon","Gien","OrlÃ©ans","Chaumont-sur-Loire","Montjean-sur-Loire","Sevastopol","Wimereux","Koenigsmacker","Belgrade","Remilly-Aillicourt","Ham-sur-Meuse","Villenave dâ€™Ornon","Kunming","KaÅŸ")
+in.cities <- c("Nahariya","HaBonim","Ashkelon","Herzliya","Fez","Palmachim","Ashdod","Marseille","Fethiye","Kas","Fethiye","Bodrum","Toulon")
 
-to.include = c(in.region,in.country) # these must be included, however I am not sure if the Pyrennes should be included or not... (likely not?)
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$sampling_city %in% remove, ]
+invapact_sf_outside <- invapact_sf_outside[!invapact_sf_outside$samplsampling_citying_region %in% in.cities, ]
+nrow(invapact_sf_outside) 
+
+
+unique(invapact_sf_outside$sampling_city) 
+unique(invapact_sf_outside$sampling_region) 
+unique(invapact_sf_outside$sampling_country) 
+unique(invapact_sf_outside$sampling_continent) 
+
+
+
+to.include = c(in.region,in.country, in.cities) # these must be included, however I am not sure if the Pyrennes should be included or not... (likely not?)
+a <- invapact[invapact$sampling_region %in%   in.region  ,]
+b <- invapact[invapact$sampling_country %in% in.country  , ]
+c<- invapact[invapact$sampling_cities %in% in.cities  , ]
+nrow(c)
+
+inside <- dplyr::bind_rows(a, b, c)
+inside_sf <- inside %>% 
+  mutate(
+    sampling_longitude = 1, # these are just a placeholder, we may want to try fill If you want
+    sampling_latitude  = 1
+  ) %>%  st_as_sf(
+    coords = c("sampling_longitude", "sampling_latitude"),
+    crs = 4326,
+    remove = FALSE )
+
+
+invapact_sf_inside <- rbind(invapact_sf_inside,inside_sf )
 
 # -----------------------------------------
 # 5️⃣ Map the result
@@ -163,6 +200,11 @@ mapview(mediterranean_all,
           cex = 1.5,
           alpha = 0.7,
           legend = FALSE)
+
+
+
+nrow(invapact_sf_inside) # 11951
+
 
 # ============================================
 # END — Clean Mediterranean INVAPACT Script
