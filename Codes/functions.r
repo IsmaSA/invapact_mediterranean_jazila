@@ -2,7 +2,7 @@ fill.coords <- function(data, use_sampling_site = TRUE) {
   if (!require("tidygeocoder")) install.packages("tidygeocoder")
   if (!require("dplyr")) install.packages("dplyr")
   library(tidygeocoder)
-  library(dplyr)
+  library(dplyr)       
   
   data_filled <- data
   

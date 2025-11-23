@@ -200,9 +200,9 @@ anyNA(invapact_sf_inside$sampling_latitude)
 a<- nrow(invapact_sf_inside[is.na(invapact_sf_inside$sampling_latitude),]) 
 a #743 to fill
 
-res <- fill.coords(invapact_sf_inside)
+res <- fill.coords(invapact_sf_inside) # this will fill some coords
 
-
+write_xlsx(res, "Filled.coords.med.xlsx")
 
 
 # -----------------------------------------
